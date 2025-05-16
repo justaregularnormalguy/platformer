@@ -197,7 +197,22 @@ public class Level {
 	//Your code goes here! 
 	//Please make sure you read the rubric/directions carefully and implement the solution recursively!
 	private void water(int col, int row, Map map, int fullness) {
-		
+		//make water (You’ll need modify this to make different kinds of water such as half water and quarter water)
+		Water w = new Water (col, row, tileSize, tileset.getImage("Full_water"), this, fullness);
+		map.addTile(col, row, w);
+
+                       //check if we can go down
+
+                       //if we can’t go down go left and right.
+		//right
+		if(col+1 < map.getTiles().length && !(map.getTiles()[col+1][row] instanceof Water)) {
+			water(col+1, row, map, 3);
+		}
+		//left
+		if(col-1 >= 0 && !(map.getTiles()[col-1][row] instanceof Water)) {
+			water(col-1, row, map, 3);
+		}
+
 	}
 
 
