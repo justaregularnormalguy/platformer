@@ -2,7 +2,7 @@ package gamelogic.player;
 
 import java.awt.Color;
 import java.awt.Graphics;
-
+import java.awt.Font;
 import gameengine.PhysicsObject;
 import gameengine.graphics.MyGraphics;
 import gameengine.hitbox.RectHitbox;
@@ -15,12 +15,13 @@ public class Player extends PhysicsObject{
 	public float jumpPower = 1350;
 
 	private boolean isJumping = false;
-
+	private long time;
 	public Player(float x, float y, Level level) {
 	
 		super(x, y, level.getLevelData().getTileSize(), level.getLevelData().getTileSize(), level);
 		int offset =(int)(level.getLevelData().getTileSize()*0.1); //hitbox is offset by 10% of the player size.
 		this.hitbox = new RectHitbox(this, offset,offset, width -offset, height - offset);
+		time = System.currentTimeMillis();
 	}
 
 	@Override
@@ -47,6 +48,12 @@ public class Player extends PhysicsObject{
 	public void draw(Graphics g) {
 		g.setColor(Color.YELLOW);
 		MyGraphics.fillRectWithOutline(g, (int)getX(), (int)getY(), width, height);
+
+		g.setFont(new Font ("Comic Sans MS", Font.PLAIN, 50));
+		g.drawString((System.currentTimeMillis() - time)/1000 +"", (int)getX(), (int)getY());
+		if (System.currentTimeMillis() - time >1000000000 ) {
+			time = System.currentTimeMillis();
+		}
 		
 		if(Main.DEBUGGING) {
 			for (int i = 0; i < closestMatrix.length; i++) {
