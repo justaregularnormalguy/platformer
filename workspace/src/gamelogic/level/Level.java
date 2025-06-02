@@ -211,48 +211,46 @@ public class Level {
 		}
 	}
 	
-	private void addGas(int col, int row, Map map, int numSquaresToFill, ArrayList<Gas> placedThisRound) {
-		Gas g = new Gas (col, row, tileSize, tileset.getImage("GasOne"), this, 0);
-		map.addTile(col, row, g);
-		numSquaresToFill--;
-		placedThisRound.add(g);
+	// Precondition: col and row are within map bounds; map is not null; numSquaresToFill > 0; placedThisRound is not null; target tile is not solid or is already Gas
+	// Postcondition: Up to numSquaresToFill non-solid, non-gas tiles (including the start) are filled with Gas tiles; map and placedThisRound are updated accordingly
+    
+    private void addGas(int col, int row, Map map, int numSquaresToFill, ArrayList<Gas> placedThisRound) {
+        // Creates and places the initial Gas tile
+        Gas g = new Gas (col, row, tileSize, tileset.getImage("GasOne"), this, 0);
+        map.addTile(col, row, g);
+        numSquaresToFill--;
+        placedThisRound.add(g);
 
-		while(numSquaresToFill >0 && placedThisRound.size() >0){
-			//consider each of the eight spots around the row col square
-			//if the spot is in bounds and notSolid() put a gas tile 
-			//afterwords change col and row to be the col and row of the first element in placedThisRound and remove that element
+        // Spreads gas to adjacent tiles until the limit is reached
+        while(numSquaresToFill > 0 && placedThisRound.size() > 0){
 
+            col = placedThisRound.get(0).getCol();
+            row = placedThisRound.get(0).getRow();
+            placedThisRound.remove(0);
 
+            // Check all adjacent positions
+            for(int rowIndex = row-1; rowIndex < row+2; rowIndex++){
+                for(int colIndex = col; colIndex > col-2 ; colIndex -= 2)
+                {
+                    // Only spreads to in-bounds, non-solid, non-gas tiles
+                    if (colIndex >= 0 && colIndex < map.getTiles().length && rowIndex >= 0 && rowIndex < map.getTiles()[0].length ){
+                        if(!(map.getTiles()[colIndex][rowIndex].isSolid()) && !(map.getTiles()[colIndex][rowIndex] instanceof Gas) && numSquaresToFill > 0 ){
+                            // Places new Gas tile and continues spreading
+                            g = new Gas (colIndex, rowIndex, tileSize, tileset.getImage("GasOne"), this, 0);
+                            map.addTile(colIndex, rowIndex, g);
+                            numSquaresToFill--;
+                            placedThisRound.add(g);	
+                        }
+                    }
 
-
-			col = placedThisRound.get(0).getCol();
-			row = placedThisRound.get(0).getRow();
-			placedThisRound.remove(0);
-
-			for(int rowIndex = row-1; rowIndex<row+2; rowIndex++){
-				for(int colIndex = col; colIndex>col-2 ; colIndex-=2)
-				{
-					
-					//check to see that colIndex and rowIndex are in bounds, that spot is not already gas and that spot is not solid
-					if (colIndex >= 0 && colIndex<map.getTiles().length && rowIndex >= 0 && rowIndex < map.getTiles() [0].length ){
-						if(!(map.getTiles()[colIndex][rowIndex].isSolid()) && !(map.getTiles()[colIndex][rowIndex] instanceof Gas) && numSquaresToFill > 0 ){
-					g = new Gas (colIndex, rowIndex, tileSize, tileset.getImage("GasOne"), this, 0);
-					map.addTile(colIndex, rowIndex, g);
-					numSquaresToFill--;
-					placedThisRound.add(g);	
-					}
-					}
-					
-
-					if(colIndex ==col){
-						colIndex+=3;
-					}
-				}   
-			} 
-
-		}
-
-	}	
+                    
+                    if(colIndex == col){
+                        colIndex += 3;
+                    }
+                }   
+            } 
+        }
+    }	
 	//#############################################################################################################
 	//Your code goes here! 
 	//Please make sure you read the rubric/directions carefully and implement the solution recursively!
@@ -311,32 +309,33 @@ public class Level {
 	   			 if (tile == null)
 	   				 continue;
 	   			 if(tile instanceof Gas) {
-	   				
-	   				 int adjacencyCount =0;
-	   				 for(int i=-1; i<2; i++) {
-	   					 for(int j =-1; j<2; j++) {
-	   						 if(j!=0 || i!=0) {
-	   							 if((x+i)>=0 && (x+i)<map.getTiles().length && (y+j)>=0 && (y+j)<map.getTiles()[x].length) {
-	   								 if(map.getTiles()[x+i][y+j] instanceof Gas) {
-	   									 adjacencyCount++;
-	   								 }
-	   							 }
-	   						 }
-	   					 }
-	   				 }
-	   				 if(adjacencyCount == 8) {
-	   					 ((Gas)(tile)).setIntensity(2);
-	   					 tile.setImage(tileset.getImage("GasThree"));
-	   				 }
-	   				 else if(adjacencyCount >5) {
-	   					 ((Gas)(tile)).setIntensity(1);
-	   					tile.setImage(tileset.getImage("GasTwo"));
-	   				 }
-	   				 else {
-	   					 ((Gas)(tile)).setIntensity(0);
-	   					tile.setImage(tileset.getImage("GasOne"));
-	   				 }
-	   			 }
+	   				// Adjust gas intensity and image based on number of adjacent Gas tiles
+       				 int adjacencyCount =0;
+       				 for(int i=-1; i<2; i++) {
+       					 for(int j =-1; j<2; j++) {
+       						 if(j!=0 || i!=0) {
+       							 if((x+i)>=0 && (x+i)<map.getTiles().length && (y+j)>=0 && (y+j)<map.getTiles()[x].length) {
+       								 if(map.getTiles()[x+i][y+j] instanceof Gas) {
+       									 adjacencyCount++;
+       								 }
+       							 }
+       						 }
+       					 }
+       				 }
+       				 // Set intensity and image based on adjacency
+       				 if(adjacencyCount == 8) {
+       					 ((Gas)(tile)).setIntensity(2);
+       					 tile.setImage(tileset.getImage("GasThree"));
+       				 }
+       				 else if(adjacencyCount >5) {
+       					 ((Gas)(tile)).setIntensity(1);
+       					tile.setImage(tileset.getImage("GasTwo"));
+       				 }
+       				 else {
+       					 ((Gas)(tile)).setIntensity(0);
+       					tile.setImage(tileset.getImage("GasOne"));
+       				 }
+       			 }
 	   			 if (camera.isVisibleOnCamera(tile.getX(), tile.getY(), tile.getSize(), tile.getSize()))
 	   				 tile.draw(g);
 	   		 }
