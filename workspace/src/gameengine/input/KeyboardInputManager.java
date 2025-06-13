@@ -3,6 +3,7 @@
  */
 package gameengine.input;
 
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -23,6 +24,7 @@ public final class KeyboardInputManager implements KeyListener {
 	}
 
 	public static boolean isKeyDown(int keyCode){
+		 
 		if(keyCode >= 0 && keyCode < keys.length && keys[keyCode]) {
 			return true;
 		}
@@ -31,6 +33,7 @@ public final class KeyboardInputManager implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent keyEvent) {
+		
 		int keyCode = keyEvent.getKeyCode();
 		if(keyCode >= 0 && keyCode < keys.length) keys[keyCode] = true;
 	}

@@ -3,6 +3,11 @@ package gamelogic.level;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.Toolkit;
+import java.applet.Applet;
+import java.applet.AudioClip;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import gameengine.PhysicsObject;
 import gameengine.graphics.Camera;
@@ -46,6 +51,8 @@ public class Level {
 	private int tileSize;
 	private Tileset tileset;
 	public static float GRAVITY = 70;
+	private long timer;
+	private long timeToBeat;
 
 	public Level(LevelData leveldata) {
 		this.leveldata = leveldata;
@@ -54,6 +61,7 @@ public class Level {
 		height = mapdata.getHeight();
 		tileSize = mapdata.getTileSize();
 		restartLevel();
+		timeToBeat = 45000;
 	}
 
 	public LevelData getLevelData(){
@@ -129,7 +137,8 @@ public class Level {
 					tiles[x][y] = new Water(xPosition, yPosition, tileSize, tileset.getImage("Quarter_water"), this, 1);}
 			}
 
-		}
+		}	
+		timer = System.currentTimeMillis();
 		enemies = new Enemy[enemiesList.size()];
 		map = new Map(width, height, tileSize, tiles);
 		camera = new Camera(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT, 0, map.getFullWidth(), map.getFullHeight());
@@ -158,7 +167,11 @@ public class Level {
 	}
 
 	public void update(float tslf) {
+		
 		if (active) {
+			if (System.currentTimeMillis() - timer > timeToBeat ) {
+				onPlayerDeath();
+			}
 			// Update the player
 			player.update(tslf);
 
@@ -176,14 +189,18 @@ public class Level {
 
 			for (int i = 0; i < flowers.size(); i++) {
 				if (flowers.get(i).getHitbox().isIntersecting(player.getHitbox())) {
-					if(flowers.get(i).getType() == 1)
+					if(flowers.get(i).getType() == 1){
 						water(flowers.get(i).getCol(), flowers.get(i).getRow(), map, 3);
+						//precondition: the player touches a flower
+						//postcondition: a beep sound is played
+						Toolkit.getDefaultToolkit().beep();
+					}
 					else
 						addGas(flowers.get(i).getCol(), flowers.get(i).getRow(), map, 20, new ArrayList<Gas>());
 					flowers.remove(i);
 					i--;
 				}
-			}
+			} 
 			boolean touchingWater = false;
 			for(Water w: waters){
 				if(w.getHitbox().isIntersecting(player.getHitbox())){
@@ -201,6 +218,14 @@ public class Level {
 				if (player.getHitbox().isIntersecting(enemies[i].getHitbox())) {
 					onPlayerDeath();
 				}
+			}
+
+			//Precondiition The player's x position is greater than 25
+			// Postcondition: If the player is at or below x position 25, the player loses
+			if (player.getX() <= 25 ) {
+				onPlayerDeath();
+				 
+				 
 			}
 
 			// Update the map
@@ -234,7 +259,7 @@ public class Level {
                 {
                     // Only spreads to in-bounds, non-solid, non-gas tiles
                     if (colIndex >= 0 && colIndex < map.getTiles().length && rowIndex >= 0 && rowIndex < map.getTiles()[0].length ){
-                        if(!(map.getTiles()[colIndex][rowIndex].isSolid()) && !(map.getTiles()[colIndex][rowIndex] instanceof Gas) && numSquaresToFill > 0 ){
+                        if(!(map.getTiles()[colIndex][rowIndex].isSolid()) && !(map.getTiles()[colIndex][rowIndex] instanceof Gas) && !(map.getTiles()[colIndex][rowIndex] instanceof Flag) && numSquaresToFill > 0 ){
                             // Places new Gas tile and continues spreading
                             g = new Gas (colIndex, rowIndex, tileSize, tileset.getImage("GasOne"), this, 0);
                             map.addTile(colIndex, rowIndex, g);
@@ -350,7 +375,9 @@ public class Level {
 
 	   	 // Draw the player
 	   	 player.draw(g);
-
+		 //precondition: game starts
+		 //postcondition: if the timer elapses, the game loses
+		 g.drawString((timeToBeat - (System.currentTimeMillis() - timer)) /1000 + "", (int) (player.getX()+tileSize/2), (int) (player.getY()+tileSize/2));
 
 
 
@@ -358,6 +385,8 @@ public class Level {
 	   	 if (Camera.SHOW_CAMERA)
 	   		 camera.draw(g);
 	   	 g.translate((int) +camera.getX(), (int) +camera.getY());
+
+		 
 	    }
 
 
@@ -403,4 +432,8 @@ public class Level {
 	public Player getPlayer() {
 		return player;
 	}
+	
+
+
+
 }

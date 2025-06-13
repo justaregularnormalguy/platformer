@@ -2,7 +2,7 @@
  * 
  */
 package gamelogic.player;
-
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
 import gameengine.input.KeyboardInputManager;
@@ -18,7 +18,7 @@ class PlayerInput {
 	 * @return true if the walk-up-key is down
 	 */
 	public static boolean isJumpKeyDown() {
-		return KeyboardInputManager.isKeyDown(KeyEvent.VK_SPACE);
+		return KeyboardInputManager.isKeyDown(KeyEvent.VK_SPACE) || KeyboardInputManager.isKeyDown((KeyEvent.VK_UP));
 	}
 	/**
 	 * 
@@ -34,4 +34,7 @@ class PlayerInput {
 	public static boolean isRightKeyDown() {
 		return KeyboardInputManager.isKeyDown(KeyEvent.VK_D) || KeyboardInputManager.isKeyDown(KeyEvent.VK_RIGHT);
 	}
+	//public static boolean isSpaceKeyDown() {
+		//return KeyboardInputManager.isKeyDown(KeyEvent.VK_SPACE);
+	//}
 }
